@@ -26,6 +26,8 @@ void q_free(queue_t *q)
 {
     /* TODO: How about freeing the list elements and the strings? */
     /* Free queue structure */
+    if (!q)
+        return;
     list_ele_t *cur = q->head;
     list_ele_t *nxt = NULL;
     while (cur) {
@@ -69,7 +71,7 @@ bool q_insert_head(queue_t *q, char *s)
     str[str_len] = '\0';
     strncpy(str, s, str_len);
 
-    if (q->size == 0)
+    if (!q->head)
         q->tail = newh;
 
     newh->next = q->head;
@@ -108,11 +110,10 @@ bool q_insert_tail(queue_t *q, char *s)
         return false;
     }
 
-
     str[str_len] = '\0';
     strncpy(str, s, str_len);
 
-    if (q->size == 0)
+    if (!q->head)
         q->head = newt;
     else
         q->tail->next = newt;
@@ -140,17 +141,15 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     if (!q || q->size == 0)
         return false;
 
-    memset(sp, '\0', bufsize);
-    strncpy(sp, q->head->value, bufsize - 1);
-    sp[bufsize - 1] = '\0';
-    free(q->head->value);
-
-    if (q->size == 1) {
-        q->head = NULL;
-        q->tail = NULL;
-    } else {
-        q->head = q->head->next;
+    if (sp) {
+        memset(sp, '\0', bufsize);
+        strncpy(sp, q->head->value, bufsize - 1);
     }
+
+    list_ele_t *tmp = q->head;
+    q->head = q->head->next;
+    free(tmp->value);
+    free(tmp);
 
     q->size--;
     return true;
@@ -179,6 +178,9 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
+    if (!q || q->head == 0)
+        return;
+
     list_ele_t *pre = NULL;
     list_ele_t *cur = q->head;
     list_ele_t *nxt = NULL;
@@ -190,8 +192,9 @@ void q_reverse(queue_t *q)
         pre = cur;
         cur = nxt;
     }
-
+    q->tail = q->head;
     q->head = pre;
+
 
     /* TODO: You need to write the code for this function */
     /* TODO: Remove the above comment when you are about to implement. */
