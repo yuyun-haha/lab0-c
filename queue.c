@@ -200,6 +200,56 @@ void q_reverse(queue_t *q)
     /* TODO: Remove the above comment when you are about to implement. */
 }
 
+void split(list_ele_t *start, list_ele_t **left, list_ele_t **right)
+{
+    list_ele_t *slow = start;
+    list_ele_t *fast = start;
+
+    while (fast->next && fast->next->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    *left = start;
+    *right = slow->next;
+    slow->next = NULL;
+
+    return;
+}
+
+list_ele_t *sort(list_ele_t *start)
+{
+    if (!start || !start->next)
+        return start;
+
+    list_ele_t *left;
+    list_ele_t *right;
+
+    split(start, &left, &right);
+
+    left = sort(left);
+    right = sort(right);
+
+    for (list_ele_t *merge = NULL; left || right;) {
+        if (!right || (left && strcmp((left->value), (right->value)) < 0)) {
+            if (!merge) {
+                start = merge = left;
+            } else {
+                merge->next = left;
+                merge = merge->next;
+            }
+            left = left->next;
+        } else {
+            if (!merge) {
+                start = merge = right;
+            } else {
+                merge->next = right;
+                merge = merge->next;
+            }
+            right = right->next;
+        }
+    }
+    return start;
+}
 
 /*
  * Sort elements of queue in ascending order
@@ -208,6 +258,12 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
+    if (!q || !q->head)
+        return;
+    q->head = sort(q->head);
+
+    while (q->tail->next)
+        q->tail = q->tail->next;
     /* TODO: You need to write the code for this function */
     /* TODO: Remove the above comment when you are about to implement. */
 }
